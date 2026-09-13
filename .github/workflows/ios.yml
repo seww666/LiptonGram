@@ -1,0 +1,40 @@
+name: Build LiptonGram iOS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build iOS app
+        run: |
+          xcodebuild \
+            -project LiptonGram.xcodeproj \
+            -scheme LiptonGram \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/LiptonGram.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            archive
+
+      - name: Pack archive
+        run: |
+          cd build
+          zip -r LiptonGram.xcarchive.zip LiptonGram.xcarchive
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: LiptonGram-iOS
+          path: build/LiptonGram.xcarchive.zip
